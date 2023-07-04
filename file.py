@@ -6,15 +6,34 @@ import xml.etree.ElementTree as ET
 import scanpy as sc
 from sklearn.preprocessing import MinMaxScaler
 from collections import defaultdict
+import concurrent.futures
 
 
 ## main
 
+gene_label = "MYH11"
+cell_label = "data_4t1_diseased_se_AAACGGGAGCCACGCT-1"
 
-adata = sc.read_h5ad(filename = '/homes/knader/mitro2/merge_seurat_stromal_filtered.h5ad')
+# Get the index corresponding to the gene label
+gene_index = Z.get_loc(gene_label)
+
+# Get the index corresponding to the cell label
+cell_index = Z.obs_names.get_loc(cell_label)
+
+# Access the value using the obtained indices
+value = adata.X[cell_index, gene_index]
+
+
+adata=sc.read_text("mitros_data_scaled.txt")
+
+
+#adata = sc.read_h5ad(filename = '/homes/knader/mitro2/merge_seurat_stromal_filtered.h5ad')
 scaled_matrix = pd.DataFrame(adata.X.T, columns=adata.obs_names, index=adata.var_names)
+
 scRNAseqData=scaled_matrix
-gs_list = gene_sets_prepare("https://raw.githubusercontent.com/IanevskiAleksandr/sc-type/master/ScTypeDB_short.xlsx", "Immune system") # e.g. Immune system, Liver, Pancreas, Kidney, Eye, Brain
+gs_list = gene_sets_prepare_corrected(path_to_db_file="/homes/knader/sctypePy/Lung_fibroblast_markers_corrected.xlsx", cell_type="Lungtissue") # e.g. Immune system, Liver, Pancreas, Kidney, Eye, Brain
+gs_list1 = gene_sets_prepare(path_to_db_file="/homes/knader/sctypePy/Lung_fibroblast_markers.xlsx", cell_type="Lungtissue") # e.g. Immune system, Liver, Pancreas, Kidney, Eye, Brain
+
 es.max = sctype_score(scRNAseqData = scRNAseqData, scaled = True, gs = gs_list['gs_positive'], gs2 = gs_list['gs_negative'])
 
 unique_clusters = pd.Series(adata.obs['seurat_clusters']).unique()
@@ -56,6 +75,7 @@ for cl in sctype_scores['cluster'].unique():
     cl_type = sctype_scores.loc[sctype_scores['cluster'] == cl, 'type']
     adata.obs.loc[adata.obs['seurat_clusters'] == cl, 'customclassif_k'] = cl_type.iloc[0]
 
+    marker_stat1 = defaultdict(int, {gene: sum(gene in genes for genes in gs_pos1.values()) for gene in set(gene for genes in gs_pos1.values() for gene in genes)})
 
 ## functions
 
@@ -63,8 +83,12 @@ def sctype_score(scRNAseqData, scaled=True, gs=None, gs2=None, gene_names_to_upp
     marker_stat = defaultdict(int, {gene: sum(gene in genes for genes in gs.values()) for gene in set(gene for genes in gs.values() for gene in genes)})
     marker_sensitivity = pd.DataFrame({'gene_': list(marker_stat.keys()), 'score_marker_sensitivity': list(marker_stat.values())})
     # Rescaling the score_marker_sensitivity column
-    scaler = MinMaxScaler(feature_range=(0, 1))
-    marker_sensitivity['score_marker_sensitivity'] = scaler.fit_transform(marker_sensitivity['score_marker_sensitivity'].values.reshape(-1, 1))
+    min_value = marker_sensitivity['score_marker_sensitivity'].min()
+    max_value = marker_sensitivity['score_marker_sensitivity'].max()
+
+    # Apply the formula to the column
+    marker_sensitivity['score_marker_sensitivity'] = 1 - (marker_sensitivity['score_marker_sensitivity'] - min_value) / (max_value - min_value)
+
     # Convert gene names to Uppercase
     if gene_names_to_uppercase:
         scRNAseqData.index = scRNAseqData.index.str.upper()
@@ -87,11 +111,8 @@ def sctype_score(scRNAseqData, scaled=True, gs=None, gs2=None, gene_names_to_upp
     marker_genes=list(set().union(*gs__.values(), *gs2__.values()))
     Z = Z.loc[marker_genes]
     # Combine scores
-    es = pd.DataFrame(
-        index=gs__.keys(),
-        columns=Z.columns,
-        data=np.zeros((len(gs__), Z.shape[1]))
-    )
+    es = pd.DataFrame(index=gs__.keys(),columns=Z.columns,data=np.zeros((len(gs__), Z.shape[1])))
+    print(es)
     for gss_, genes in gs__.items():
         for j in range(Z.shape[1]):
             gs_z = Z.loc[genes, Z.columns[j]]
@@ -105,14 +126,24 @@ def sctype_score(scRNAseqData, scaled=True, gs=None, gs2=None, gene_names_to_upp
     return es
 
 
+
 def gene_sets_prepare(path_to_db_file, cell_type):
     cell_markers = pd.read_excel(path_to_db_file)
     cell_markers = cell_markers[cell_markers['tissueType'] == cell_type]
     cell_markers['geneSymbolmore1'] = cell_markers['geneSymbolmore1'].str.replace(" ", "")
     cell_markers['geneSymbolmore2'] = cell_markers['geneSymbolmore2'].str.replace(" ", "")
     
-    hgnc_table = pd.read_csv("hgnc_table.txt", names=["Symbol", "Approved_Symbol"], sep=" ", header=1)
-    res = dict(zip(hgnc_table.Symbol, hgnc_table.Approved_Symbol))
+    #hgnc_table = pd.read_csv("/homes/knader/sctypePy/hgnc_table.txt", names=["Symbol", "Approved_Symbol"], sep=" ", header=1)
+    #res = dict(zip(hgnc_table.Symbol, hgnc_table.Approved_Symbol))
+    
+    posmarkers = cell_markers['geneSymbolmore1'].dropna().str.split(',', expand=True).stack().reset_index(drop=True)
+    negmarkers = cell_markers['geneSymbolmore2'].dropna().str.split(',', expand=True).stack().reset_index(drop=True)
+
+    # Concatenate the two columns and remove 'None' values
+    gene_names = pd.concat([posmarkers, negmarkers]).drop_duplicates().reset_index(drop=True)
+    gene_names = gene_names[gene_names != 'None']
+
+    res=return_gene_symbol(gene_names)
     
     cell_markers['geneSymbolmore1'] = cell_markers['geneSymbolmore1'].apply(lambda row: process_gene_symbols(row, res))
     cell_markers['geneSymbolmore2'] = cell_markers['geneSymbolmore2'].apply(lambda row: process_gene_symbols(row, res))
@@ -140,6 +171,62 @@ def process_gene_symbols(gene_symbols, res):
         return ','.join(markers_all)
     else:
         return ""
+
+
+def gene_sets_prepare_corrected(path_to_db_file, cell_type):
+    cell_markers = pd.read_excel(path_to_db_file)
+    cell_markers = cell_markers[cell_markers['tissueType'] == cell_type]
+    cell_markers['geneSymbolmore1'] = cell_markers['geneSymbolmore1'].str.replace(" ", "")
+    cell_markers['geneSymbolmore2'] = cell_markers['geneSymbolmore2'].str.replace(" ", "")
+    cell_markers['geneSymbolmore1'] = cell_markers['geneSymbolmore1'].str.replace("///", ",")
+    cell_markers['geneSymbolmore1'] = cell_markers['geneSymbolmore1'].str.replace(" ", "")
+    cell_markers['geneSymbolmore2'] = cell_markers['geneSymbolmore2'].str.replace("///", ",")
+    cell_markers['geneSymbolmore2'] = cell_markers['geneSymbolmore2'].str.replace(" ", "")
+    gs_positive = cell_markers.groupby('cellName')['geneSymbolmore1'].apply(lambda x: x.str.split(',').explode().unique().tolist()).to_dict()
+    gs_negative = cell_markers.groupby('cellName')['geneSymbolmore2'].apply(lambda x: x.str.split(',').explode().unique().tolist()).to_dict()
+    return {'gs_positive': gs_positive, 'gs_negative': gs_negative} 
+
+
+def check_gene_symbol(gene_symbol):
+    url = f'https://rest.genenames.org/search/{gene_symbol}'
+    response = requests.get(url)
+    # Parse the XML data
+    root = ET.fromstring(response.text)
+    # Find the "result" element
+    result = root.find("result")
+    # Get the maximum score value
+    max_score = float(result.get("maxScore"))
+    # Find the doc element with the maximum score
+    max_score_doc = None
+    for doc in result.findall("doc"):
+        score = float(doc.find("float[@name='score']").text)
+        if score == max_score:
+            max_score_doc = doc
+            break
+    # Retrieve the symbol value
+    symbol_element = max_score_doc.find("str[@name='symbol']")
+    if symbol_element is not None:
+        symbol = symbol_element.text
+    else:
+        symbol = None
+    return symbol
+
+def process_gene(gene_symbol):
+    symbol = check_gene_symbol(gene_symbol)
+    return gene_symbol, symbol
+
+def return_gene_symbol(gene_list):
+    # Create a ThreadPoolExecutor
+    executor = concurrent.futures.ThreadPoolExecutor()
+    # Create a dictionary to store gene-symbol mappings
+    gene_symbol_map = {}
+    # Submit tasks for each gene symbol
+    futures = [executor.submit(process_gene, gene) for gene in gene_list]
+    # Retrieve results as they become available
+    for future in concurrent.futures.as_completed(futures):
+        gene, symbol = future.result()
+        gene_symbol_map[gene] = symbol
+    return gene_symbol_map
 
 
 
