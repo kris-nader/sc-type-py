@@ -1,3 +1,15 @@
+import numpy as np
+import pandas as pd
+from sklearn.preprocessing import scale
+import xml.etree.ElementTree as ET
+import scanpy as sc
+from sklearn.preprocessing import MinMaxScaler
+from collections import defaultdict
+import concurrent.futures
+import multiprocessing
+from functools import partial
+import openpyxl
+
 adata=sc.read_text("/Users/naderkri/Desktop/pbmc_scale.txt",first_column_names=True)
 scaled_matrix_ko = pd.DataFrame(adata.X, index=adata.obs_names, columns=adata.var_names)
 
