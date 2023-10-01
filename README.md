@@ -1,5 +1,7 @@
 # sc-type-py
 
+THIS IS A PET PROJECT AND MIGHT NEED MORE TESTING: HAS BEEN SUCCESSFUL ON 2/2 CASES!!!!!!
+
 How to Use:
 
 This GitHub repository is designed to facilitate the use of sctype in Python. Follow these steps to get started:
