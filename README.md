@@ -12,3 +12,6 @@ Next, load your scaled data into Python and run the "Step 2.PY" file. This file 
 
 **Step 3**: Continuing Analysis
 Take the annotation x cell file generated in Step 2 and incorporate it into your R workflow as usual. Proceed with the analysis using the "Step 3.R" file.
+
+
+I'll prob be able to work on this later or something to make a checksymbols function that works a bit better/faster in python
