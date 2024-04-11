@@ -19,7 +19,9 @@ We will show the implementation using interactive python
 ```python
 python3 -i ./sptypepy.py 
 ```
-Once interactive python has been established, we can easily run functions that are equivalent to the sctype R implementation. Some differences include the query HGNC for approved gene symbols. In the R implementation, HGNChelper::checkGeneSymbols() is used. However, as no suitable equivalent has been found, rest.genenames API is used. 
+
+Once interactive Python is set up, running functions equivalent to the sctype R implementation becomes straightforward. There are some differences, such as querying HGNC for approved gene symbols. In the R implementation, the <code>HGNChelper::checkGeneSymbols()</code> function is utilized. However, as no suitable equivalent has been identified, the rest.genenames API is employed instead.
+
 ```python
 # Load the data- this is scaled 
 adata = sc.read_text("/Users/naderkri/Desktop/sptype/pbmc_scaled.txt",first_column_names=True)
@@ -29,7 +31,7 @@ es_max = sctype_score(scRNAseqData = scRNAseqData, scaled = True, gs = gs_list['
 
 
 ```
-For the sake of showing that scType-py and scType-R result in the same annotations, we will export ex_max to a txt file and use R to overlay the scType-R annotations and the scType-py annotations. 
+To validate the consistency between scType-py and scType-R annotations, we'll export ex_max to a txt file. Subsequently, we'll use R to overlay the annotations derived from scType-R alongside those from scType-py.
 
 <br>
 <p align="center">
