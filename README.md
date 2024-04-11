@@ -34,6 +34,7 @@ For the sake of showing that scType-py and scType-R result in the same annotatio
 <br>
 <p align="center">
   <img src="https://github.com/kris-nader/sc-type-py/blob/main/sctype_py_R.png" width="100%">
+  <img src="https://github.com/kris-nader/sc-type-py/blob/main/proof.png" width="70%">
 </p>
 <br>
 
