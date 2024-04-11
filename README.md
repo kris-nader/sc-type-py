@@ -15,12 +15,24 @@ This GitHub covers the implementation of scType ,originally developed in R,  in 
 <br><br>
 
 ## Quick start
-We will show the implementation using interactive python
-```python
+To use with interactive python, users will need a local copy of sptypepy.py.
+```bash
 python3 -i ./sptypepy.py 
 ```
+Alternatively, they can import it from GitHub
+```python
+import urllib.request
 
-Once interactive Python is set up, running functions equivalent to the sctype R implementation becomes straightforward. There are some differences, such as querying HGNC for approved gene symbols. In the R implementation, the <code>HGNChelper::checkGeneSymbols()</code> function is utilized. However, as no suitable equivalent has been identified, the rest.genenames API is employed instead.
+# Fetch the script from the URL
+url = "https://raw.githubusercontent.com/kris-nader/sc-type-py/main/file.py"
+response = urllib.request.urlopen(url)
+script = response.read().decode()
+
+# Execute the script
+exec(script)
+```
+
+At this point, running functions equivalent to the sctype R implementation becomes straightforward. There are some differences, such as querying HGNC for approved gene symbols. In the R implementation, the <code>HGNChelper::checkGeneSymbols()</code> function is utilized. However, as no suitable equivalent has been identified, the rest.genenames API is employed instead.
 
 ```python
 # Load the data- this is scaled 
