@@ -31,7 +31,11 @@ es_max = sctype_score(scRNAseqData = scRNAseqData, scaled = True, gs = gs_list['
 ```
 For the sake of showing that scType-py and scType-R result in the same annotations, we will export ex_max to a txt file and use R to overlay the scType-R annotations and the scType-py annotations. 
 
-![alt text](https://github.com/kris-nader/sc-type-py/blob/master/sctype_py_R.png)
+<br>
+<p align="center">
+  <img src="https://github.com/kris-nader/sc-type-py/blob/main/sctype_py_R.png" width="100%">
+</p>
+<br>
 
 
 
