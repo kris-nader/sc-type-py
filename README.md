@@ -1,19 +1,48 @@
-# sc-type-py
 
-THIS IS A PET PROJECT AND MIGHT NEED MORE TESTING: HAS BEEN SUCCESSFUL ON 2/2 CASES!!!!!!
+# ScType: Fully-automated and ultra-fast cell-type identification using specific marker combinations from single-cell transcriptomic data
 
-How to Use:
+**Article**: [https://doi.org/10.1038/s41467-022-28803-w]
 
-This GitHub repository is designed to facilitate the use of sctype in Python. Follow these steps to get started:
+<p style="text-align:justify;"> <b>ScType</b> a computational method for automated selection of marker genes based merely on scRNA-seq data. The open-source portal (<a href="//sctype.app">http://sctype.app</a>) provides an interactive web-implementation of the method.</p>
 
-**Step 1**: Cleaning Gene Sets
-Execute "Step 1": Run the original gene_sets_prepare from sctype. This step is necessary to clean the gene set file. Since there isn't a straightforward and efficient way to validate gene symbols in Python, we'll stick to the R version for this task. The "Step 1.R" file will convert the input file into a cleaned and corrected HGNC symbol XLSX file.
+This GitHub covers the implementation of scType ,originally developed in R,  in python. 
 
-**Step 2**: Calculating Scytype Score
-Next, load your scaled data into Python and run the "Step 2.PY" file. This file will compute the scytype score, and the results will be saved in a .txt file for future reference. This file will serve as an annotation x cell file.
+##
+<br><br>
 
-**Step 3**: Continuing Analysis
-Take the annotation x cell file generated in Step 2 and incorporate it into your R workflow as usual. Proceed with the analysis using the "Step 3.R" file.
+![alt text](https://github.com/IanevskiAleksandr/sc-type/blob/master/ScTypePlan.png)
+
+<br><br>
+
+## Quick start
+We will show the implementation using interactive python
+```python
+python3 -i ./sptypepy.py 
+```
+Once interactive python has been established, we can easily run functions that are equivalent to the sctype R implementation. Some differences include the query HGNC for approved gene symbols. In the R implementation, HGNChelper::checkGeneSymbols() is used. However, as no suitable equivalent has been found, rest.genenames API is used. 
+```python
+# Load the data- this is scaled 
+adata = sc.read_text("/Users/naderkri/Desktop/sptype/pbmc_scaled.txt",first_column_names=True)
+scRNAseqData = pd.DataFrame(adata.X, columns=adata.var_names, index=adata.obs_names)
+gs_list = gene_sets_prepare(path_to_db_file="/Users/naderkri/Downloads/ScTypeDB_full.xlsx",cell_type="Immune system")
+es_max = sctype_score(scRNAseqData = scRNAseqData, scaled = True, gs = gs_list['gs_positive'], gs2 = gs_list['gs_negative'])
 
 
-I'll prob be able to work on this later or something to make a checksymbols function that works a bit better/faster in python
+```
+For the sake of showing that scType-py and scType-R result in the same annotations, we will export ex_max to a txt file and use R to overlay the scType-R annotations and the scType-py annotations. 
+
+![alt text](https://github.com/kris-nader/sc-type-py/blob/master/sctype_py_R.png)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
