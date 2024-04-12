@@ -6,20 +6,12 @@
 <p style="text-align:justify;"> <b>ScType</b> a computational method for automated selection of marker genes based merely on scRNA-seq data. The open-source portal (<a href="//sctype.app">http://sctype.app</a>) provides an interactive web-implementation of the method.</p>
 
 This GitHub covers the implementation of scType ,originally developed in R,  in python. 
-
-##
 <br><br>
-
 ![alt text](https://github.com/IanevskiAleksandr/sc-type/blob/master/ScTypePlan.png)
-
 <br><br>
 
 ## Quick start
-To use with interactive python, users will need a local copy of sptypepy.py.
-```bash
-python3 -i ./sptypepy.py 
-```
-Alternatively, they can import it from GitHub
+
 ```python
 import urllib.request
 
@@ -51,6 +43,8 @@ To validate the consistency between scType-py and scType-R annotations, we'll ex
   <img src="https://github.com/kris-nader/sc-type-py/blob/main/proof.png" width="70%">
 </p>
 <br>
+
+## Integrating scType in a scanpy workflow
 
 
 
