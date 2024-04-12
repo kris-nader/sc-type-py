@@ -14,11 +14,6 @@ from requests.adapters import HTTPAdapter
 from urllib3.util.retry import Retry
 
 
-
-
-path_to_db_file="/Users/naderkri/Downloads/ScTypeDB_full.xlsx"
-cell_type="Immune system"
-
 def gene_sets_prepare(path_to_db_file, cell_type):
     # Read data from Excel file
     cell_markers = pd.read_excel(path_to_db_file)
@@ -134,3 +129,15 @@ def sctype_score(scRNAseqData, scaled=True, gs=None, gs2=None, gene_names_to_upp
             es.loc[gss_, Z.columns[j]] = sum_t1 + sum_t2
     es = es.dropna(how='all')
     return es
+
+def process_cluster(cluster,adata,es_max):
+    cluster_data = es_max.loc[:, adata.obs.index[adata.obs['leiden'] == cluster]]
+    es_max_cl = cluster_data.sum(axis=1).sort_values(ascending=False)
+    top_scores = es_max_cl.head(10)
+    ncells = sum(adata.obs['leiden'] == cluster)
+    return pd.DataFrame({
+        'cluster': cluster,
+        'type': top_scores.index,
+        'scores': top_scores.values,
+        'ncells': ncells
+    })
