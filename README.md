@@ -45,7 +45,7 @@ To validate the consistency between scType-py and scType-R annotations, we'll ex
 <br>
 
 ## Integrating scType in a scanpy workflow
-#  scType for scRNAseq data
+###  scType for scRNAseq data
 ```python
 pd.set_option("display.precision", 9)
 import urllib.request
