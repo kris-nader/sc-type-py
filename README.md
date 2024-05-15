@@ -128,6 +128,90 @@ for cluster in sctype_scores['cluster'].unique():
 sc.pl.umap(adata, color='sctype_classification', title='UMAP with sctype_classification')
 ```
 
+## scType goes spatial
+An example on mouse brain
+
+```python
+np.random.seed(100)
+import urllib.request
+import scanpy as sc
+
+# Fetch the script from the URL
+url = "https://raw.githubusercontent.com/kris-nader/sc-type-py/main/sctype_py.py"
+response = urllib.request.urlopen(url)
+script = response.read().decode()
+
+# Execute the script
+exec(script)
+```
+
+```python
+adata = sc.datasets.visium_sge(sample_id="V1_Mouse_Brain_Sagittal_Anterior")
+adata.var_names_make_unique()
+
+adata.layers["counts"] = adata.X.copy()
+sc.pp.highly_variable_genes(adata, n_top_genes=2000, flavor="seurat_v3",layer="counts")
+sc.pp.normalize_total(adata)
+sc.pp.log1p(adata)
+
+adata.raw = adata
+
+# Scale and run PCA
+sc.pp.scale(adata,max_value=10)
+scaled_data = pd.DataFrame(adata.X)
+# change column indexes
+scaled_data.columns =adata.var_names
+# Change the row indexes
+scaled_data.index = adata.obs_names
+scaled_data=scaled_data.T
+
+
+sc.tl.pca(adata,zero_center=False,random_state=0)
+sc.pp.neighbors(adata, n_neighbors=20, n_pcs=10,use_rep="X_pca",random_state=0)
+sc.tl.leiden(adata,resolution=0.8,n_iterations=10)
+sc.tl.louvain(adata, resolution=r.0.8, random_state = int(r.clustering_seed_scan))
+
+
+# Visualize clusters using UMAP
+sc.tl.umap(adata,min_dist=0.3)
+sc.pl.umap(adata, color=['leiden'])
+sc.pl.spatial(adata, img_key="hires", color=["leiden"])
+```
+```python
+
+gs_list=gene_sets_prepare(path_to_db_file="/Users/naderkri/Downloads/ScTypeDB_full.xlsx",cell_type="Brain")
+
+scRNAseqData=scaled_data
+
+es_max = sctype_score(scRNAseqData = scRNAseqData, scaled = True, gs = gs_list['gs_positive'], gs2 = gs_list['gs_negative'])
+unique_clusters = adata.obs['leiden'].unique()
+# Apply the function to each unique cluster and combine the results into a DataFrame
+cL_results = pd.concat([process_cluster(cluster,adata,es_max) for cluster in unique_clusters])
+
+# Group by cluster and select the top row based on scores
+sctype_scores = cL_results.groupby('cluster').apply(lambda x: x.nlargest(1, 'scores')).reset_index(drop=True)
+
+# Set low-confidence clusters to "Unknown"
+sctype_scores.loc[sctype_scores['scores'] < sctype_scores['ncells'] / 4, 'type'] = 'Unknown'
+
+
+adata.obs['sctype_classification'] = ""
+
+# Iterate over unique clusters
+for cluster in sctype_scores['cluster'].unique():
+    # Filter sctype_scores for the current cluster
+    cl_type = sctype_scores[sctype_scores['cluster'] == cluster]
+    # Get the type for the current cluster
+    cl_type_value = cl_type['type'].iloc[0]
+    # Update 'sctype_classification' in pbmc.obs for cells belonging to the current cluster
+    adata.obs.loc[adata.obs['leiden'] == cluster, 'sctype_classification'] = cl_type_value
+
+# Plot the UMAP with sctype_classification as labels
+sc.pl.umap(adata, color='sctype_classification', title='UMAP with sctype_classification')
+sc.pl.spatial(adata, img_key="hires", color=["sctype_classification"])
+```
+
+
 
 
 
