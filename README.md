@@ -129,7 +129,7 @@ for cluster in sctype_scores['cluster'].unique():
 sc.pl.umap(adata, color='sctype_classification', title='UMAP with sctype_classification')
 ```
 
-## scType goes spatial
+###  scType for spatial transcriptomics data
 An example on mouse brain
 
 ```python
