@@ -45,6 +45,7 @@ To validate the consistency between scType-py and scType-R annotations, we'll ex
 <br>
 
 ## Integrating scType in a scanpy workflow
+On this page, we will highlight the use of sctype on scRNAseq data. For a tutorial on using sctype in python using spatial transcriptomics data, we refer users to the  <a href="https://github.com/kris-nader/sc-type-py/blob/main/spatial_tutorial.md" target="_blank">following link</a>. 
 ###  scType for scRNAseq data
 ```python
 pd.set_option("display.precision", 9)
