@@ -46,7 +46,9 @@ To validate the consistency between scType-py and scType-R annotations, we'll ex
 
 ## Integrating scType in a scanpy workflow
 On this page, we will highlight the use of sctype on scRNAseq data. For a tutorial on using sctype in python using spatial transcriptomics data, we refer users to the  <a href="https://github.com/kris-nader/sc-type-py/blob/main/spatial_tutorial.md" target="_blank">following link</a>. 
-###  scType for scRNAseq data
+
+### Load and cluster the data
+We load a PBMC 3k example dataset. The raw data can be found <a href='https://cf.10xgenomics.com/samples/cell/pbmc3k/pbmc3k_filtered_gene_bc_matrices.tar.gz' download>here</a>.
 ```python
 pd.set_option("display.precision", 9)
 import urllib.request
@@ -67,8 +69,10 @@ import scanpy as sc
 adata=sc.read_10x_mtx("/Users/naderkri/Downloads/filtered_gene_bc_matrices/hg19/")
 sc.pp.filter_cells(adata, min_genes=200)
 sc.pp.filter_genes(adata, min_cells=3)
+```
 
-# Normalize the data
+Normalize, scale and cluster the data.
+```python
 adata.layers["counts"] = adata.X.copy()
 sc.pp.normalize_total(adata, target_sum=1e4,exclude_highly_expressed=False)
 sc.pp.log1p(adata)
@@ -85,7 +89,6 @@ scaled_data=scaled_data.T
 
 decimal_places = 8
 modified_matrix = {key: [round(val, decimal_places) for val in values] for key, values in scaled_data.items()}
-
 mod=pd.DataFrame(modified_matrix)
 mod.index = adata.var_names
 scaled_data=mod
@@ -97,8 +100,10 @@ sc.tl.umap(adata)
 sc.pl.umap(adata, color=['leiden'])
 ```
 
-Run scType with the following functions. These functions may be a bit slower than the original implementation in R. 
+Now, we can  automatically assign cell types using ScType. For that, we first load 2 additional ScType functions: gene_sets_prepare and sctype_score
+These functions may be a bit slower than the original implementation in R. As stated earlier, this is due to the fact that there is no well estabilshed package to accuratly retrieve approved gene symbols. For this reason, we decided to query the HGNC database for approved symbols. 
 
+Users can prepare their gene input cell marker file or use the sctypeDB. The input XLSX must be formatted in the same way as the original scTypeDB. DB file should contain four columns (tissueType - tissue type, cellName - cell type, geneSymbolmore1 - positive marker genes, geneSymbolmore2 - marker genes not expected to be expressed by a cell type)
 
 
 ```python
