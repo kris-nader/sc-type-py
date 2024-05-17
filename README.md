@@ -65,8 +65,8 @@ exec(script)
 Process the single cell data using scanpy. There are slight differences in the results of the scanpy and Seurat workflows. For this reason, we have followed XXX paper discussing potential alterations to the default functions to achieve similar results to the Seurat workflow.
 
 ```python
-import scanpy as sc
-adata=sc.read_10x_mtx("/Users/naderkri/Downloads/filtered_gene_bc_matrices/hg19/")
+np.random.seed(100)
+adata=sc.read_10x_mtx("./filtered_gene_bc_matrices/hg19/")
 sc.pp.filter_cells(adata, min_genes=200)
 sc.pp.filter_genes(adata, min_cells=3)
 ```
@@ -74,9 +74,10 @@ sc.pp.filter_genes(adata, min_cells=3)
 Normalize, scale and cluster the data.
 ```python
 adata.layers["counts"] = adata.X.copy()
-sc.pp.normalize_total(adata, target_sum=1e4,exclude_highly_expressed=False)
+sc.pp.normalize_total(adata,target_sum=1e4)
 sc.pp.log1p(adata)
-sc.pp.highly_variable_genes(adata, n_top_genes=2000, flavor="seurat_v3", layer="counts")
+sc.pp.highly_variable_genes(adata, n_top_genes=2000, flavor="seurat_v3",layer="counts")
+adata.raw = adata
 
 # Scale and run PCA
 sc.pp.scale(adata,max_value=10)
@@ -87,16 +88,11 @@ scaled_data.columns =adata.var_names
 scaled_data.index = adata.obs_names
 scaled_data=scaled_data.T
 
-decimal_places = 8
-modified_matrix = {key: [round(val, decimal_places) for val in values] for key, values in scaled_data.items()}
-mod=pd.DataFrame(modified_matrix)
-mod.index = adata.var_names
-scaled_data=mod
 
-sc.tl.pca(adata, svd_solver="arpack",zero_center=False)
+sc.tl.pca(adata,zero_center=False)
 sc.pp.neighbors(adata, n_neighbors=20, n_pcs=10,use_rep="X_pca")
-sc.tl.leiden(adata,resolution=0.8,random_state=0,flavor="igraph",n_iterations=10,directed=False)
-sc.tl.umap(adata)
+sc.tl.leiden(adata, resolution=0.8)
+sc.tl.umap(adata,min_dist=0.3)
 sc.pl.umap(adata, color=['leiden'])
 ```
 
@@ -108,21 +104,21 @@ Users can prepare their gene input cell marker file or use the sctypeDB. The inp
 
 ```python
 scRNAseqData=scaled_data
-gs_list=gene_sets_prepare(path_to_db_file="/Users/naderkri/Downloads/ScTypeDB_full.xlsx",cell_type="Immune system")
+gs_list=gene_sets_prepare(path_to_db_file="./ScTypeDB_full.xlsx",cell_type="Immune system")
 es_max = sctype_score(scRNAseqData = scRNAseqData, scaled = True, gs = gs_list['gs_positive'], gs2 = gs_list['gs_negative'])
 
 unique_clusters = adata.obs['leiden'].unique()
 # Apply the function to each unique cluster and combine the results into a DataFrame
-cL_results = pd.concat([process_cluster(cluster,adata,es_max) for cluster in unique_clusters])
+cL_results = pd.concat([process_cluster(cluster,adata,es_max,'leiden') for cluster in unique_clusters])
 
 # Group by cluster and select the top row based on scores
 sctype_scores = cL_results.groupby('cluster').apply(lambda x: x.nlargest(1, 'scores')).reset_index(drop=True)
 
 # Set low-confidence clusters to "Unknown"
 sctype_scores.loc[sctype_scores['scores'] < sctype_scores['ncells'] / 4, 'type'] = 'Unknown'
-adata.obs['sctype_classification'] = ""
 
 # Iterate over unique clusters
+adata.obs['sctype_classification'] = ""
 for cluster in sctype_scores['cluster'].unique():
     # Filter sctype_scores for the current cluster
     cl_type = sctype_scores[sctype_scores['cluster'] == cluster]
@@ -134,6 +130,10 @@ for cluster in sctype_scores['cluster'].unique():
 # Plot the UMAP with sctype_classification as labels
 sc.pl.umap(adata, color='sctype_classification', title='UMAP with sctype_classification')
 ```
+
+<p align="center"> 
+<img src="https://github.com/kris-nader/sc-type-py/blob/main/sctype_py.png">
+</p>
 
 
 
