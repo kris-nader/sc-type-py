@@ -39,12 +39,11 @@ Please note that variations in preprocessing steps can lead to different annotat
 ```python
 adata = sc.datasets.visium_sge(sample_id="V1_Mouse_Brain_Sagittal_Anterior")
 adata.var_names_make_unique()
-
 adata.layers["counts"] = adata.X.copy()
+
 sc.pp.highly_variable_genes(adata, n_top_genes=2000, flavor="seurat_v3",layer="counts")
 sc.pp.normalize_total(adata)
 sc.pp.log1p(adata)
-
 adata.raw = adata
 
 # Scale and run PCA
