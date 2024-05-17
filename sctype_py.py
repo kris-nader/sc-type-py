@@ -191,11 +191,11 @@ def sctype_score(scRNAseqData, scaled=True, gs=None, gs2=None, gene_names_to_upp
     es = es.dropna(how='all')
     return es
 
-def process_cluster(cluster,adata,es_max):
-    cluster_data = es_max.loc[:, adata.obs.index[adata.obs['leiden'] == cluster]]
+def process_cluster(cluster,adata,es_max,clustering):
+    cluster_data = es_max.loc[:, adata.obs.index[adata.obs[clustering] == cluster]]
     es_max_cl = cluster_data.sum(axis=1).sort_values(ascending=False)
     top_scores = es_max_cl.head(10)
-    ncells = sum(adata.obs['leiden'] == cluster)
+    ncells = sum(adata.obs[clustering] == cluster)
     return pd.DataFrame({
         'cluster': cluster,
         'type': top_scores.index,
