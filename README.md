@@ -131,11 +131,9 @@ for cluster in sctype_scores['cluster'].unique():
 sc.pl.umap(adata, color='sctype_classification', title='UMAP with sctype_classification')
 ```
 
-<p align="center"> 
-<img src="https://github.com/kris-nader/sc-type-py/blob/main/sctype_py.png">
+<p align="center">
+  <img src="https://github.com/kris-nader/sc-type-py/blob/main/sctype_py.png" width="70%">
 </p>
-
-
 
 
 
