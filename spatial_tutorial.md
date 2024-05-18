@@ -34,7 +34,7 @@ exec(script)
 ```
 Load sample data available through Scanpy. Specifically, we will use the "Mouse Brain Sagittal Anterior" dataset generated using V1 Chromium technology. 
 In this tutorial, we will follow the preprocessing steps outlined by Scanpy in their basic analysis tutorial see <a href="https://scanpy-tutorials.readthedocs.io/en/latest/spatial/basic-analysis.html" target="_blank">scanpy tutorial for more details</a>.
-Please note that variations in preprocessing steps can lead to different annotations(SCtransform vs LogNormalize or Leiden vs Louvain).. Additionally, the annotations produced can vary significantly between different packages, such as Seurat and Scanpy, as discussed in this <a href="https://www.biorxiv.org/content/10.1101/2024.04.04.588111v2.abstract" target="_blank">paper</a>.
+Please note that variations in preprocessing choices can lead to different annotations(SCtransform vs LogNormalize or Leiden vs Louvain). Additionally, the annotations produced can vary significantly between different packages, such as Seurat and Scanpy, as discussed in this <a href="https://www.biorxiv.org/content/10.1101/2024.04.04.588111v2.abstract" target="_blank">paper</a>.
 
 ```python
 adata = sc.datasets.visium_sge(sample_id="V1_Mouse_Brain_Sagittal_Anterior")
