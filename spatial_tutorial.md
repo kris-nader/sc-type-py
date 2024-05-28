@@ -20,11 +20,13 @@ Please refer to the original <a href="https://www.nature.com/articles/s41467-022
 We start with by loading all required functions for this analysis. These are the original scType functions rewritten in python and applied on spatial transcriptomics data. 
 
 ```python
-np.random.seed(100)
+
 import urllib.request
 import scanpy as sc
 import numpy as np
 import pandas as pd
+np.random.seed(100)
+
 
 # Fetch the script from the URL
 url = "https://raw.githubusercontent.com/kris-nader/sc-type-py/main/sctype_py.py"
@@ -73,14 +75,14 @@ Now, let's run the sctype functions. This involves several steps: querying the H
 Users are welcome to use their own custom marker datasets. For this example, we will use the default scTypeDB, which contains annotations for various healthy tissues. For more detailed information, please refer to the <a href="https://www.nature.com/articles/s41467-022-28803-w" target="_blank">original paper</a>.
 
 ```python
-gs_list=gene_sets_prepare(path_to_db_file="./ScTypeDB_full.xlsx",cell_type="Brain")
 
 scRNAseqData=scaled_data
+gs_list=gene_sets_prepare(path_to_db_file="https://raw.githubusercontent.com/IanevskiAleksandr/sc-type/master/ScTypeDB_full.xlsx" ,cell_type="Brain")
 
 es_max = sctype_score(scRNAseqData = scRNAseqData, scaled = True, gs = gs_list['gs_positive'], gs2 = gs_list['gs_negative'])
 unique_clusters = adata.obs['leiden'].unique()
 # Apply the function to each unique cluster and combine the results into a DataFrame
-cL_results = pd.concat([process_cluster(cluster,adata,es_max) for cluster in unique_clusters])
+cL_results = pd.concat([process_cluster(cluster,adata,es_max,"leiden") for cluster in unique_clusters])
 
 # Group by cluster and select the top row based on scores
 sctype_scores = cL_results.groupby('cluster').apply(lambda x: x.nlargest(1, 'scores')).reset_index(drop=True)
