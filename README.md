@@ -65,6 +65,9 @@ exec(script)
 Process the single cell data using scanpy. There are slight differences in the results of the scanpy and Seurat workflows. For this reason, we have followed XXX paper discussing potential alterations to the default functions to achieve similar results to the Seurat workflow.
 
 ```python
+import numpy as np
+import pandas as pd
+
 np.random.seed(100)
 adata=sc.read_10x_mtx("./filtered_gene_bc_matrices/hg19/")
 sc.pp.filter_cells(adata, min_genes=200)
@@ -104,7 +107,7 @@ Users can prepare their gene input cell marker file or use the sctypeDB. The inp
 
 ```python
 scRNAseqData=scaled_data
-gs_list=gene_sets_prepare(path_to_db_file="./ScTypeDB_full.xlsx",cell_type="Immune system")
+gs_list=gene_sets_prepare(path_to_db_file="https://raw.githubusercontent.com/IanevskiAleksandr/sc-type/master/ScTypeDB_full.xlsx",cell_type="Immune system")
 es_max = sctype_score(scRNAseqData = scRNAseqData, scaled = True, gs = gs_list['gs_positive'], gs2 = gs_list['gs_negative'])
 
 unique_clusters = adata.obs['leiden'].unique()
