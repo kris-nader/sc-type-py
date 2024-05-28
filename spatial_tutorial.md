@@ -17,12 +17,14 @@ Please refer to the original <a href="https://www.nature.com/articles/s41467-022
 
 
 <br>
-We start with by loading all recquired functions for this analysis. These are the original scType functions rewritten in python and applied on spatial transcritpomoics data. 
+We start with by loading all required functions for this analysis. These are the original scType functions rewritten in python and applied on spatial transcriptomics data. 
 
 ```python
 np.random.seed(100)
 import urllib.request
 import scanpy as sc
+import numpy as np
+import pandas as pd
 
 # Fetch the script from the URL
 url = "https://raw.githubusercontent.com/kris-nader/sc-type-py/main/sctype_py.py"
@@ -71,7 +73,7 @@ Now, let's run the sctype functions. This involves several steps: querying the H
 Users are welcome to use their own custom marker datasets. For this example, we will use the default scTypeDB, which contains annotations for various healthy tissues. For more detailed information, please refer to the <a href="https://www.nature.com/articles/s41467-022-28803-w" target="_blank">original paper</a>.
 
 ```python
-gs_list=gene_sets_prepare(path_to_db_file="/Users/naderkri/Downloads/ScTypeDB_full.xlsx",cell_type="Brain")
+gs_list=gene_sets_prepare(path_to_db_file="./ScTypeDB_full.xlsx",cell_type="Brain")
 
 scRNAseqData=scaled_data
 
