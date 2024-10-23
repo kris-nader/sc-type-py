@@ -16,7 +16,7 @@ This GitHub covers the implementation of scType ,originally developed in R,  in 
 import urllib.request
 
 # Fetch the script from the URL
-url = "https://raw.githubusercontent.com/kris-nader/sc-type-py/main/file.py"
+url = "https://raw.githubusercontent.com/kris-nader/sc-type-py/main/sctype_py.py"
 response = urllib.request.urlopen(url)
 script = response.read().decode()
 
