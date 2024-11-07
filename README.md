@@ -14,6 +14,9 @@ This GitHub covers the implementation of scType ,originally developed in R,  in 
 
 ```python
 import urllib.request
+import scanpy as sc
+import numpy as np
+import pandas as pd
 
 # Fetch the script from the URL
 url = "https://raw.githubusercontent.com/kris-nader/sc-type-py/main/sctype_py.py"
@@ -52,6 +55,9 @@ We load a PBMC 3k example dataset. The raw data can be found <a href='https://cf
 ```python
 pd.set_option("display.precision", 9)
 import urllib.request
+import scanpy as sc
+import numpy as np
+import pandas as pd
 
 # Fetch the script from the URL
 url = "https://raw.githubusercontent.com/kris-nader/sc-type-py/main/sctype_py.py"
