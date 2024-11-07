@@ -22,8 +22,11 @@ def gene_sets_prepare(path_to_db_file, cell_type):
     # Filter by cell_type
     cell_markers = cell_markers[cell_markers['tissueType'] == cell_type]
     # Preprocess geneSymbolmore1 and geneSymbolmore2 columns
+    #for col in ['geneSymbolmore1', 'geneSymbolmore2']:
+    #    cell_markers[col] = cell_markers[col].str.replace(" ", "").str.upper()
     for col in ['geneSymbolmore1', 'geneSymbolmore2']:
-        cell_markers[col] = cell_markers[col].str.replace(" ", "").str.upper()
+        if col in cell_markers.columns:
+            cell_markers[col] = cell_markers[col].fillna('').str.replace(" ", "").str.upper()
     # Stack and drop duplicates to get unique gene names
     gene_names = pd.concat([cell_markers['geneSymbolmore1'], cell_markers['geneSymbolmore2']]).str.split(',', expand=True).stack().drop_duplicates().reset_index(drop=True)
     gene_names = gene_names[gene_names != 'None'].unique()
